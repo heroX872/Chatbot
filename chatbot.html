@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatbot</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #222;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  #chat {
+    width: 90%;
+    max-width: 400px;
+    height: 400px;
+    background: #333;
+    border-radius: 10px;
+    padding: 10px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  #userInput {
+    width: 90%;
+    max-width: 400px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+  }
+  .message { margin: 5px 0; }
+  .user { color: #4fc3f7; }
+  .ia { color: #ffeb3b; }
+</style>
+</head>
+<body>
+
+<div id="chat"></div>
+<input type="text" id="userInput" placeholder="Digite algo..." />
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("userInput");
+
+// Banco de respostas estilo natural
+const responses = {
+  "oi": ["Oi, como posso ajudar?", "Olá! Tudo bem?", "E aí! Como vai?"],
+  "olá": ["Oi, como posso ajudar?", "Olá! Que bom te ver!", "Oi oi oi!"],
+  "tudo bem": ["Estou bem!", "Sim, obrigado!", "Tudo ótimo!"],
+  "oque e vc": ["Sou uma IA simples.", "Uma IA pronta pra ajudar!", "Apenas uma assistente virtual."],
+  "ok": ["Ok, okay!", "Beleza!", "Certo!"],
+  "okay": ["Ok, okay!", "Beleza!", "Certo!"],
+  "tchau": ["Tchau!", "Até mais!", "Volte sempre!"],
+  "adeus": ["Tchau!", "Até logo!", "Falou!"],
+  "qual seu nome": ["Pode me chamar de IA!", "Sou sua assistente virtual.", "Sou uma IA, mas você pode me dar um apelido!"]
+};
+
+// Frases aleatórias soltas
+const respostasAleatorias = [
+  "ok",
+  "Hmmm...",
+  "Interessante!",
+  "Ah, entendi!",
+  "Isso é legal!",
+  "Vamos continuar!",
+  "nossa....",
+  "Pode me explicar melhor?",
+  "Haha, ok!",
+  "Eu entendi o que você quis dizer!"
+];
+
+// Escolhe uma resposta aleatória do banco
+function chooseResponse(key) {
+  const arr = responses[key];
+  if(arr && arr.length > 0){
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+  return null;
+}
+
+// Verifica se é expressão matemática
+function isMathExpression(msg) {
+  return /^[0-9+\-*/().\s]+$/.test(msg);
+}
+
+// Adiciona mensagem ao chat
+function addMessage(sender, text) {
+  const div = document.createElement("div");
+  div.classList.add("message", sender);
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// Processa resposta da IA
+function getResponse(msg) {
+  msg = msg.toLowerCase().trim();
+
+  // 1️⃣ Se for cálculo matemático
+  if(isMathExpression(msg)){
+    try { 
+      return "Resultado: " + eval(msg); 
+    } catch(e) { 
+      return "Erro na expressão matemática!"; 
+    }
+  }
+
+  // 2️⃣ Checa respostas padrão
+  for(let key in responses){
+    if(msg.includes(key)){
+      return chooseResponse(key);
+    }
+  }
+
+  // 3️⃣ Pergunta sem sentido → sugere interpretações + frase aleatória
+  const sugestoes = [
+    "vc ta tentando dizer: oi, tudo bem ou oque e vc?'?"
+  ];
+  const aleatoria = respostasAleatorias[Math.floor(Math.random() * respostasAleatorias.length)];
+  return "Não entendi sua pergunta. " + sugestoes.join(" ") + " " + aleatoria;
+}
+
+// Evento Enter (mais confiável que keypress)
+input.addEventListener("keydown", function(e) {
+  if(e.key === "Enter" && input.value.trim() !== ""){
+    const userMsg = input.value;
+    addMessage("user", "Você: " + userMsg);
+    const iaMsg = getResponse(userMsg);
+    addMessage("ia", "IA: " + iaMsg);
+    input.value = "";
+  }
+});
+
+// Mensagem inicial
+addMessage("ia", "Olá! Sou seu chatbot, pergunte o que quiser!");
+</script>
+
+</body>
+</html>
